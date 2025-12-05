@@ -47,6 +47,7 @@ pip install \
     sentence-transformers \
     pypdf \
     langchain-text-splitters \ 
+    streamlit \
 
 if [ $? -ne 0 ]; then
     echo "[ERROR] Dependency installation failed."
