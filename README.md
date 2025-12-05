@@ -256,7 +256,7 @@ ollama serve
 
 ---
 
-❌ Error: "listen tcp 127.0.0.1:11434: bind: address already in use"  
+### ❌ Error: "listen tcp 127.0.0.1:11434: bind: address already in use"  
 This means Ollama is already running in the background — you do NOT need to run `ollama serve` manually.  
 Check with `curl http://localhost:11434/api/tags` or restart Ollama using `pkill -f Ollama && open -a Ollama`.
  
