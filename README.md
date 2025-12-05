@@ -74,7 +74,7 @@ Uses the latest Runnable & LangGraph patterns.
                         │          │
                         ▼          ▼
             ┌────────────────┐   ┌────────────────┐
-            │ Retriever       │   │ Prompt Builder │
+            │ Retriever      │   │ Prompt Builder │
             │ (ChromaDB)     │   └────────────────┘
             └──────┬─────────┘
                    ▼
@@ -107,6 +107,7 @@ smart_study_agent/
 │
 ├── .env.example
 ├── .gitignore
+├── requirements.txt
 ├── install_dependencies.sh
 └── README.md
 ```
@@ -147,7 +148,7 @@ pip install -r requirements.txt
 
 ## ✅ Option A — Use OpenAI (recommended for best quality)
 
-1. Create a `.env` file:
+1. Create a `.env` file (look at `.env.example`):
 
 ```env
 OPENAI_API_KEY=sk-your-key-here
@@ -158,13 +159,26 @@ OPENAI_API_KEY=sk-your-key-here
 - `ChatOpenAI`
 - `OpenAIEmbeddings`
 
+### 🔑 OpenAI Setup (Optional — for Best Model Quality)
+
+If you want to use OpenAI models (GPT-4.1, GPT-4o, etc.) instead of the free local LLM, follow these steps:
+
+#### ⭐ How to Get an OpenAI API Key
+1. Visit: https://platform.openai.com/account/api-keys  
+2. Log in with your OpenAI account  
+3. Click **"Create new secret key"**  
+4. Copy the key (it looks like: `sk-xxxxxx...`)
+
+#### ⭐ Add Your Key to the Project
+Create a `.env` file in the project root:
+
 ---
 
 ## 🆓 Option B — Fully Local Mode (no API key)
 
 If `.env` does *not* contain an API key, the system switches to:
 
-- **LLM:** Ollama (`llama3`)  
+- **LLM:** Ollama (`llama3` - size: 4.3GB, runs locally)  
 - **Embeddings:** HuggingFace (`all-MiniLM-L6-v2`)  
 
 ### Install & Run Ollama
@@ -242,6 +256,12 @@ ollama serve
 
 ---
 
+❌ Error: "listen tcp 127.0.0.1:11434: bind: address already in use"  
+This means Ollama is already running in the background — you do NOT need to run `ollama serve` manually.  
+Check with `curl http://localhost:11434/api/tags` or restart Ollama using `pkill -f Ollama && open -a Ollama`.
+ 
+---
+
 ### ❌ “No documents found”
 Ensure your files are inside:
 
@@ -273,11 +293,6 @@ Try adjusting:
 
 # 🤝 Contributing
 PRs and suggestions are welcome!
-
----
-
-# 📄 License
-MIT License.
 
 ---
 
