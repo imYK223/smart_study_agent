@@ -69,7 +69,7 @@ from app.config import get_embeddings, get_llm
 DB_DIR = Path("data/chroma_db")
 
 
-def get_retriever(k: int = 4):
+def get_retriever(k: int = 20):
     """
     Build a retriever on top of the persisted Chroma DB.
     Uses either OpenAI or HuggingFace embeddings (see config.get_embeddings).
@@ -96,13 +96,20 @@ def build_rag_chain():
     llm = get_llm()
 
     system_prompt = """You are a helpful study assistant.
-You ONLY use the provided context to answer.
-If the answer is not in the context, say you don't know.
+
+You primarily use the provided context to answer.
+If the answer clearly requires information far beyond the context,
+do your best with what you have instead of complaining about missing pages.
+
+If the user asks to "summarize the whole PDF" or "summarize the whole document",
+produce the best high-level summary you can from the available context.
+Do NOT say that you only see a few pages; instead, act as if you are summarizing
+the key ideas you can observe.
 
 Always:
 - Answer clearly and concisely
 - Use bullet points where helpful
-- Mention which document or section you used if possible.
+- Mention which concepts, chapters, or sections you see in the context if possible.
 """
 
     prompt = ChatPromptTemplate.from_messages(
