@@ -1,5 +1,5 @@
 # 📘 Smart Study Agent  
-### *A LangGraph + LangChain RAG Agent with Automatic OpenAI / Local LLM Switching*
+### *A LangGraph + LangChain RAG Agent with Automatic OpenAI / Local LLM Switching + Optional Streamlit GUI*
 
 ---
 
@@ -8,49 +8,50 @@
 **Smart Study Agent** is an intelligent, document-aware assistant built using:
 
 - **LangChain** → document loading, embeddings, retrieval  
-- **LangGraph** → agent workflow  
+- **LangGraph** → agent workflow orchestration  
 - **ChromaDB** → vector database  
-- **OpenAI or Ollama** → LLM backend  
-- **HuggingFace embeddings** (fallback when no API key is provided)
+- **OpenAI or Ollama** → LLM backend (auto-selected)  
+- **HuggingFace embeddings** → local fallback  
+- **Streamlit GUI (optional)** → clean chat interface  
 
-Upload your PDFs or text notes → the agent ingests them → then ask it:
+Upload multiple PDFs → the system ingests them → then ask questions like:
 
 - “Summarize Chapter 3”
-- “Explain this in simple words”
-- “Give bullet-point notes”
-- “Compare Topic A and Topic B”
+- “Explain this concept simply”
+- “Give me bullet-point notes”
+- “Compare topic A vs topic B”
 
-This project demonstrates **RAG**, **agentic reasoning**, and **backend flexibility**, making it ideal for ML/AI portfolio use.
+This project showcases **LLM orchestration, RAG pipelines, embeddings, agents, vector search, and multimodal ingestion**—perfect for your AI/ML portfolio.
 
 ---
 
 ## 🚀 Features
 
 ### 🔍 Retrieval-Augmented Generation (RAG)
-The agent retrieves relevant text chunks from your documents and produces grounded answers.
+Semantic search + contextual answers directly from user documents.
 
 ### 🔄 Automatic Backend Switching
-No setup required:
 
 | Condition | LLM Backend | Embeddings |
 |----------|-------------|------------|
-| **OPENAI_API_KEY is set** | OpenAI GPT Models | OpenAIEmbeddings |
-| **No API key** | Local **Ollama** Model (llama3, phi3, etc.) | HuggingFace MiniLM |
+| `.env` has API key | OpenAI GPT models | OpenAIEmbeddings |
+| No API key / quota | Ollama (local) | HuggingFace MiniLM |
 
 ### 🆓 100% Free Local Mode
-If you don’t set an OpenAI key, the system defaults to:
+Works offline using:
 
-- **Ollama** (“llama3” by default)  
-- **HuggingFace all-MiniLM-L6-v2 (local embeddings)**
+- **Ollama + llama3**  
+- **HuggingFace all-MiniLM-L6-v2 embeddings**
 
 ### 🧩 Modular Architecture
 - Ingestion pipeline  
-- RAG chain (Runnable graph)  
-- LangGraph agent node  
-- Easily expandable  
+- RAG chain  
+- LangGraph agent  
+- Vector DB  
+- Optional GUI  
 
-### 🧠 Clean, modern LangChain v0.2+ API
-Uses the latest Runnable & LangGraph patterns.
+### 🖥️ Streamlit Web GUI (Optional)
+A modern chat-style web interface to replace the terminal.
 
 ---
 
@@ -63,27 +64,26 @@ Uses the latest Runnable & LangGraph patterns.
                                ▼
                      ┌─────────────────┐
                      │   LangGraph     │
-                     │  (rag_node)     │
+                     │    Agent        │
                      └───────┬─────────┘
                              │
                              ▼
                 ┌──────────────────────────┐
                 │       RAG Pipeline       │
-                │  (Runnable composition)  │
+                │  (Runnable Composition)  │
                 └───────┬──────────┬───────┘
                         │          │
                         ▼          ▼
             ┌────────────────┐   ┌────────────────┐
             │ Retriever      │   │ Prompt Builder │
-            │ (ChromaDB)     │   └────────────────┘
-            └──────┬─────────┘
+            └──────┬─────────┘   └────────────────┘
                    ▼
          ┌──────────────────────┐
          │ LLM (OpenAI/Ollama)  │
          └──────────────────────┘
                    ▼
           ┌────────────────────┐
-          │   Final Answer     │
+          │    Final Answer    │
           └────────────────────┘
 ```
 
@@ -94,16 +94,17 @@ Uses the latest Runnable & LangGraph patterns.
 ```
 smart_study_agent/
 │
-├── main.py                   # LangGraph agent
+├── main.py                     # LangGraph terminal agent
+├── ui_app.py                   # Streamlit GUI
 │
 ├── app/
-│   ├── config.py             # OpenAI vs Local (Ollama) backend switch
-│   ├── ingest.py             # PDF/Text → ChromaDB vectorstore
-│   ├── rag_chain.py          # RAG pipeline using Runnables
+│   ├── config.py               # OpenAI vs Local backend switch
+│   ├── ingest.py               # PDF → Chroma ingestion
+│   ├── rag_chain.py            # RAG pipeline using Runnables
 │
 ├── data/
-│   ├── source/               # Put your PDFs here
-│   └── chroma_db/            # Auto-generated vector DB
+│   ├── source/                 # User PDF uploads
+│   └── chroma_db/              # Vector database
 │
 ├── .env.example
 ├── .gitignore
@@ -119,7 +120,7 @@ smart_study_agent/
 ## 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/smart_study_agent
+git clone https://github.com/imYK223/smart_study_agent.git
 cd smart_study_agent
 ```
 
@@ -140,6 +141,12 @@ Or manually:
 
 ```bash
 pip install -r requirements.txt
+```
+
+## 4. (Optional) Install GUI dependencies
+
+```bash
+pip install streamlit
 ```
 
 ---
@@ -179,30 +186,24 @@ Create a `.env` file in the project root:
 If `.env` does *not* contain an API key, the system switches to:
 
 - **LLM:** Ollama (`llama3` - size: 4.3GB, runs locally)  
-- **Embeddings:** HuggingFace (`all-MiniLM-L6-v2`)  
+- **Embeddings:** HuggingFace (`all-MiniLM-L6-v2`) 
 
-### Install & Run Ollama
-
-1. Download Ollama: https://ollama.com  
-2. Pull a model:
+### Install Ollama:
 
 ```bash
+brew install ollama
 ollama pull llama3
 ```
 
-3. Start server:
-
-```bash
-ollama serve
-```
+Ollama auto-runs in the background on macOS; you typically do **not** need to call `ollama serve` manually.
 
 ---
 
 # 📥 Step 1: Ingest Your Documents
 
-Place PDFs or text files in:
+Place PDFs or TXT files into:
 
-```
+```text
 data/source/
 ```
 
@@ -212,88 +213,126 @@ Then run:
 python -m app.ingest
 ```
 
-This will:
-
-- Load PDFs  
-- Split text into chunks  
-- Create embeddings  
-- Save them inside `data/chroma_db/`  
+This builds the Chroma vector DB.
 
 ---
 
-# 🤖 Step 2: Run the Smart Study Agent
+# 🤖 Step 2: 
+## A. Run the Streamlit Web GUI (Recommended)
+
+```bash
+streamlit run ui_app.py
+```
+
+This launches a browser-based interface at:
+
+```text
+http://localhost:8501
+```
+
+You can upload PDFs, rebuild the index, and chat with the agent in a chat-like UI.
+
+---
+## B. Run the Smart Study Agent (Terminal Mode)
 
 ```bash
 python main.py
 ```
 
-Example interaction:
+This starts a simple CLI where you can type questions and get answers based on your documents.
 
+---
+
+
+
+## 🖥️ Choosing Between GUI Mode and Terminal Mode
+
+The project provides **two independent ways** to interact with the Smart Study Agent:
+
+### 1️⃣ Streamlit GUI (Recommended)
+Run:
+
+```bash
+streamlit run ui_app.py
 ```
-Question: summarize chapter 3
-Answer: ...
+
+- No need to run `main.py` beforehand  
+- Upload PDFs directly from the browser  
+- Rebuild the index with a button  
+- Chat-style interface with history  
+- Best option for day-to-day usage and demos  
+
+### 2️⃣ Terminal Agent (CLI via LangGraph)
+
+Run:
+
+```bash
+python main.py
 ```
 
-Examples you can try:
+- Uses the same RAG + LangGraph backend  
+- Useful for debugging, quick tests, or when you prefer the terminal  
+- No GUI required  
 
-- summarize chapter 3  
-- explain rigid body transformations  
-- list 5 key points from chapter 2  
-- compare foundation pose and classical methods  
+Both modes are **independent** — you can use either one at any time.
 
 ---
 
 # 🧪 Troubleshooting
 
-### ❌ Error: `Connection refused http://localhost:11434`
-You are in **local mode**, but Ollama is not running.
-
+### ❌ `Connection refused http://localhost:11434`
+Ollama is not running.  
 Fix:
 
 ```bash
-ollama serve
+open -a Ollama
 ```
 
 ---
 
-### ❌ Error: `Listen tcp 127.0.0.1:11434: bind: address already in use` 
-This means Ollama is already running in the background — you do NOT need to run `ollama serve` manually.  
-Check with `curl http://localhost:11434/api/tags` or restart Ollama using `pkill -f Ollama && open -a Ollama`.
- 
+### ❌ `listen tcp 127.0.0.1:11434: bind: address already in use`
+Ollama is already running in the background — you do **not** need to run `ollama serve` manually.  Check with `curl http://localhost:11434/api/tags` or restart Ollama using `pkill -f Ollama && open -a Ollama`.
+
 ---
 
 ### ❌ “No documents found”
-Ensure your files are inside:
+Add your files to:
 
-```
+```text
 data/source/
 ```
 
----
+Then rebuild the index:
 
-### ❌ Irrelevant RAG output  
-Try adjusting:
-
-- Chunk size  
-- Chunk overlap  
-- More source documents  
+```bash
+python -m app.ingest
+```
 
 ---
 
-# 📈 Roadmap (Future Enhancements)
+### ❌ OpenAI quota error (429)
+You are out of OpenAI API credits.  
+Remove `OPENAI_API_KEY` from `.env` → the system automatically switches to **local mode** (Ollama + HuggingFace embeddings).
 
-- [ ] REST API (FastAPI)  
-- [ ] Web UI (Streamlit / React)  
+---
+
+# 📈 Roadmap
+
+- [x] Multi-PDF ingestion  
+- [x] Automatic backend switching  
+- [x] Local LLM support (llama3)  
+- [x] Streamlit GUI  
+- [ ] FastAPI REST backend  
+- [ ] Web deployment (HuggingFace Spaces)  
 - [ ] Multi-agent LangGraph workflow  
-- [ ] PDF citation extraction  
-- [ ] Online document upload  
-- [ ] Reranking & semantic filtering  
+- [ ] Document citation extraction  
 
 ---
 
 # 🤝 Contributing
+
 PRs and suggestions are welcome!
 
 ---
 
-# ⭐ If you find this project useful, please consider starring the repo!
+# ⭐ If this project helps you, please consider starring the repo!
